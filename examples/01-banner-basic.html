@@ -64,7 +64,7 @@
     </style>
   </head>
   <body>
-    <div id="seasonly-file-help" hidden style="position:fixed;inset:0;z-index:99999;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;padding:32px;font-family:system-ui,-apple-system,sans-serif">
+    <div id="seasonly-file-help" style="display:none;position:fixed;inset:0;z-index:99999;background:#0f172a;color:#e2e8f0;align-items:center;justify-content:center;padding:32px;font-family:system-ui,-apple-system,sans-serif">
       <div style="max-width:560px;line-height:1.6">
         <h1 style="margin:0 0 12px;font-size:22px">Open this page via <code>http://</code>, not <code>file://</code></h1>
         <p>This example imports ES modules. Browsers block module imports from <code>file://</code> URLs as a security measure (CORS on null origin).</p>
@@ -78,7 +78,7 @@
       (function () {
         if (location.protocol !== 'file:') return;
         var help = document.getElementById('seasonly-file-help');
-        help.removeAttribute('hidden');
+        help.style.display = 'flex';
         var link = document.getElementById('seasonly-help-link');
         var path = location.pathname;
         var idx = path.lastIndexOf('/examples/');
