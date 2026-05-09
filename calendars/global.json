@@ -1,0 +1,63 @@
+{
+  "$schema": "../docs/calendar.schema.json",
+  "id": "global",
+  "name": "Global",
+  "version": "1.0.0",
+  "seasons": [
+    {
+      "id": "new-year",
+      "name": "New Year",
+      "date": "01-01",
+      "daysBefore": 6,
+      "daysAfter": 7,
+      "particles": "confetti",
+      "gradient": ["#0ea5e9", "#fde047"],
+      "textColor": "#0c4a6e",
+      "icon": "🎊"
+    },
+    {
+      "id": "valentines",
+      "name": "Valentine's Day",
+      "date": "02-14",
+      "daysBefore": 7,
+      "daysAfter": 7,
+      "particles": "hearts",
+      "gradient": ["#fb7185", "#f472b6"],
+      "textColor": "#831843",
+      "icon": "💝"
+    },
+    {
+      "id": "halloween",
+      "name": "Halloween",
+      "date": "10-31",
+      "daysBefore": 7,
+      "daysAfter": 1,
+      "particles": "bats",
+      "gradient": ["#1e1b4b", "#f97316"],
+      "textColor": "#fff7ed",
+      "icon": "🎃"
+    },
+    {
+      "id": "christmas",
+      "name": "Christmas",
+      "date": "12-25",
+      "daysBefore": 10,
+      "daysAfter": 0,
+      "particles": "snowflakes",
+      "gradient": ["#15803d", "#dc2626"],
+      "textColor": "#fef2f2",
+      "icon": "🎄"
+    },
+    {
+      "id": "new-years-eve",
+      "name": "New Year's Eve",
+      "date": "12-31",
+      "daysBefore": 3,
+      "daysAfter": 0,
+      "particles": "fireworks",
+      "gradient": ["#312e81", "#fbbf24"],
+      "textColor": "#fef9c3",
+      "icon": "✨"
+    }
+  ]
+}

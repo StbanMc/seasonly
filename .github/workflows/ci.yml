@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (Node ${{ matrix.node }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['18', '20', '22']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Verify zero runtime dependencies
+        run: npm run verify:zero-deps
+
+      - name: Run tests
+        run: npm test
+
+      - name: Smoke check (public surface intact)
+        run: |
+          node -e "import('./src/index.js').then(m => { const expected = ['resolveSeason','validateCalendar','loadCalendar']; const missing = expected.filter(k => typeof m[k] !== 'function'); if (missing.length) { console.error('Missing exports:', missing); process.exit(1); } console.log('OK: public surface =', expected.length, 'functions'); });"
+
+      - name: Validate bundled calendars
+        run: |
+          node -e "import('./src/index.js').then(async m => { const fs = await import('fs'); for (const f of ['co','global']) { const c = JSON.parse(fs.readFileSync('./calendars/'+f+'.json','utf8')); const r = m.validateCalendar(c); if (!r.valid) { console.error('Calendar '+f+' is invalid:', r.errors); process.exit(1); } console.log('OK: calendar '+f+' has', c.seasons.length, 'seasons'); } });"
+
+      - name: Pure component submodules are Node-safe (no HTMLElement leak)
+        run: |
+          node -e "Promise.all([import('./src/components/banner-style.js'),import('./src/components/banner-storage.js'),import('./src/components/banner-motion.js'),import('./src/components/particles-effects.js'),import('./src/components/particles-rng.js')]).then(([s,st,m,e,r]) => { if (typeof s.buildBannerCSS !== 'function') throw new Error('banner-style'); if (typeof st.dismissKey !== 'function') throw new Error('banner-storage'); if (typeof m.prefersReducedMotion !== 'function') throw new Error('banner-motion'); if (typeof e.buildParticlesCSS !== 'function') throw new Error('particles-effects'); if (typeof r.createRng !== 'function') throw new Error('particles-rng'); console.log('OK: 5 pure component submodules import cleanly in Node'); });"
+
+      - name: Particle effects registry covers every value the schema validator allows
+        run: |
+          node -e "Promise.all([import('./src/components/particles-effects.js'),import('./src/core/schema-validator.js')]).then(([e]) => { const expected = ['none','snowflakes','hearts','confetti','stars','fireworks','balloons','flowers','flags','kites','lightning','candles','bats','leaves','petals']; const missing = expected.filter(n => !e.getEffect(n)); if (missing.length) { console.error('Effects registry missing:', missing); process.exit(1); } console.log('OK: all', expected.length, 'particle effects implemented'); });"
+
+      - name: Auto-init parser is Node-safe (no DOM imports leaked)
+        run: |
+          node -e "import('./src/auto-init.js').then(m => { const expected = ['parseAutoInitOptions','isSafeHref','shouldMountBanner','shouldMountParticles']; const missing = expected.filter(k => typeof m[k] !== 'function'); if (missing.length) { console.error('auto-init missing exports:', missing); process.exit(1); } console.log('OK: auto-init parser exports', expected.length, 'pure functions'); });"
+
+      - name: Bundle-size budget
+        run: npm run size

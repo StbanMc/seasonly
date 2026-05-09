@@ -1,0 +1,93 @@
+{
+  "name": "seasonly",
+  "version": "0.1.0",
+  "description": "Tiny, zero-dependency seasonal theming for any website. Date-aware banners and particles with a pluggable calendar system. LATAM-first (Colombia bundled), extensible to any country, religion, or custom calendar. Web Component, browser-native, framework-agnostic.",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "browser": "./src/auto.js",
+  "unpkg": "./src/auto.js",
+  "jsdelivr": "./src/auto.js",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./auto": {
+      "browser": "./src/auto.js",
+      "default": "./src/auto.js"
+    },
+    "./auto-init": "./src/auto-init.js",
+    "./components": {
+      "browser": "./src/components/index.js",
+      "default": "./src/components/index.js"
+    },
+    "./components/banner": {
+      "browser": "./src/components/banner.js",
+      "default": "./src/components/banner.js"
+    },
+    "./components/particles": {
+      "browser": "./src/components/particles.js",
+      "default": "./src/components/particles.js"
+    },
+    "./components/banner-style": "./src/components/banner-style.js",
+    "./components/banner-storage": "./src/components/banner-storage.js",
+    "./components/banner-motion": "./src/components/banner-motion.js",
+    "./components/particles-effects": "./src/components/particles-effects.js",
+    "./components/particles-rng": "./src/components/particles-rng.js",
+    "./calendars/*.json": "./calendars/*.json",
+    "./schema": "./docs/calendar.schema.json"
+  },
+  "types": "./types/index.d.ts",
+  "files": [
+    "src/",
+    "calendars/",
+    "types/",
+    "docs/calendar.schema.json",
+    "examples/",
+    "tools/",
+    "README.md",
+    "README.es.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:watch": "node --test --watch tests/*.test.js",
+    "size": "node tools/bundle-size.mjs",
+    "dev": "node tools/serve.mjs",
+    "verify:zero-deps": "node -e \"const pkg = JSON.parse(require('fs').readFileSync('./package.json','utf8')); if (pkg.dependencies && Object.keys(pkg.dependencies).length > 0) { console.error('Runtime dependencies are not allowed:', pkg.dependencies); process.exit(1); } if (pkg.devDependencies && Object.keys(pkg.devDependencies).length > 0) { console.error('Dev dependencies are not allowed in this library:', pkg.devDependencies); process.exit(1); } console.log('OK: zero runtime and dev dependencies');\""
+  },
+  "keywords": [
+    "seasonal",
+    "themes",
+    "holidays",
+    "banner",
+    "particles",
+    "web-components",
+    "custom-elements",
+    "shadow-dom",
+    "calendar",
+    "latam",
+    "colombia",
+    "i18n",
+    "zero-dependencies",
+    "no-build",
+    "vanilla",
+    "javascript"
+  ],
+  "author": "Esteban Esquivel <stbanmc@users.noreply.github.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "homepage": "https://stbanmc.github.io/seasonly/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/StbanMc/seasonly.git"
+  },
+  "bugs": {
+    "url": "https://github.com/StbanMc/seasonly/issues"
+  }
+}

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/StbanMc/seasonly/discussions
+    about: Open-ended questions, ideas, and "how do I..." live in Discussions, not Issues.
+  - name: Security advisories
+    url: https://github.com/StbanMc/seasonly/security/advisories/new
+    about: Found a vulnerability? Report it privately here, not in a public issue.

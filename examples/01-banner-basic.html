@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>seasonly · banner basic</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Inter", sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+        padding: 80px 24px;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { background: linear-gradient(180deg, #0f172a, #1e293b); color: #e2e8f0; }
+      }
+      .stage {
+        max-width: 720px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.25);
+      }
+      @media (prefers-color-scheme: dark) {
+        .stage { background: rgba(15, 23, 42, 0.7); border-color: rgba(255, 255, 255, 0.06); }
+      }
+      h1 { font-size: 24px; margin: 0 0 12px; }
+      p { margin: 0 0 16px; opacity: 0.75; line-height: 1.5; }
+      label { display: block; margin: 8px 0 4px; font-weight: 600; font-size: 14px; }
+      select, input { font: inherit; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+      .actions { display: flex; gap: 8px; margin-top: 16px; }
+      button {
+        font: inherit; font-weight: 600;
+        padding: 8px 14px; border-radius: 9999px;
+        border: 1px solid rgba(0,0,0,0.1);
+        background: white; color: inherit; cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      button:hover { transform: translateY(-1px); }
+      .log {
+        margin-top: 16px;
+        font-family: ui-monospace, "SF Mono", Consolas, monospace;
+        font-size: 12px;
+        background: rgba(0,0,0,0.04);
+        border-radius: 10px;
+        padding: 10px 12px;
+        min-height: 60px;
+        white-space: pre-wrap;
+      }
+      @media (prefers-color-scheme: dark) {
+        .log { background: rgba(255,255,255,0.05); }
+        select, input, button { background: rgba(255,255,255,0.05); color: inherit; border-color: rgba(255,255,255,0.1); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="seasonly-file-help" hidden style="position:fixed;inset:0;z-index:99999;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;padding:32px;font-family:system-ui,-apple-system,sans-serif">
+      <div style="max-width:560px;line-height:1.6">
+        <h1 style="margin:0 0 12px;font-size:22px">Open this page via <code>http://</code>, not <code>file://</code></h1>
+        <p>This example imports ES modules. Browsers block module imports from <code>file://</code> URLs as a security measure (CORS on null origin).</p>
+        <p>From the repo root run:</p>
+        <pre style="background:rgba(255,255,255,0.08);padding:10px 12px;border-radius:8px;font-family:ui-monospace,monospace;font-size:13px">npm run dev</pre>
+        <p>Then open:</p>
+        <p><a id="seasonly-help-link" style="color:#67e8f9;font-family:ui-monospace,monospace;word-break:break-all"></a></p>
+      </div>
+    </div>
+    <script>
+      (function () {
+        if (location.protocol !== 'file:') return;
+        var help = document.getElementById('seasonly-file-help');
+        help.removeAttribute('hidden');
+        var link = document.getElementById('seasonly-help-link');
+        var path = location.pathname;
+        var idx = path.lastIndexOf('/examples/');
+        var rel = idx >= 0 ? path.slice(idx + 1) : 'examples/' + path.split('/').pop();
+        link.textContent = 'http://localhost:5173/' + rel;
+        link.href = 'http://localhost:5173/' + rel;
+      })();
+    </script>
+    <main class="stage">
+      <h1>seasonly · banner smoke</h1>
+      <p>
+        Pick a season from the bundled Colombia calendar, then mount the banner.
+        The banner uses Shadow DOM, so its styles never leak into this page.
+        Try with system "Reduce motion" toggled on/off to verify accessibility.
+      </p>
+
+      <div class="row">
+        <div>
+          <label for="season">Season</label>
+          <select id="season"></select>
+        </div>
+        <div>
+          <label for="position">Position</label>
+          <select id="position">
+            <option value="top">top</option>
+            <option value="bottom">bottom</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="message">Banner message (host-provided, optional)</label>
+      <input id="message" placeholder="e.g. Up to 30% off for Black Friday" />
+
+      <label for="cta">CTA label (optional)</label>
+      <input id="cta" placeholder="e.g. Shop now" />
+
+      <div class="actions">
+        <button id="mount">Mount banner</button>
+        <button id="clear-storage">Clear dismiss memory</button>
+      </div>
+
+      <div id="log" class="log" aria-live="polite"></div>
+    </main>
+
+    <script type="module">
+      import { resolveSeason, listPeaks } from '../src/index.js';
+      import { defineSeasonlyBanner } from '../src/components/banner.js';
+      import co from '../calendars/co.json' with { type: 'json' };
+
+      defineSeasonlyBanner();
+
+      const $season = document.getElementById('season');
+      const $position = document.getElementById('position');
+      const $message = document.getElementById('message');
+      const $cta = document.getElementById('cta');
+      const $mount = document.getElementById('mount');
+      const $clear = document.getElementById('clear-storage');
+      const $log = document.getElementById('log');
+
+      function log(line) {
+        const ts = new Date().toLocaleTimeString();
+        $log.textContent = '[' + ts + '] ' + line + '\n' + $log.textContent;
+      }
+
+      // Populate season selector with everything in CO and pre-select today's active one.
+      const today = new Date();
+      for (const s of co.seasons) {
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name + ' (' + s.id + ')';
+        $season.appendChild(opt);
+      }
+      const active = resolveSeason(today, co);
+      if (active) {
+        $season.value = active.season.id;
+        log('Today (' + today.toDateString() + ') resolves to: ' + active.season.name + ', distance ' + active.distance + 'd');
+      } else {
+        log('Today (' + today.toDateString() + ') has no active seasonal theme. Pick one to preview.');
+      }
+
+      let current = null;
+      $mount.addEventListener('click', () => {
+        if (current) current.remove();
+        const season = co.seasons.find((s) => s.id === $season.value);
+        const banner = document.createElement('seasonly-banner');
+        banner.theme = season;
+        if ($position.value === 'bottom') banner.setAttribute('position', 'bottom');
+        if ($message.value) banner.message = $message.value;
+        if ($cta.value) banner.ctaText = $cta.value;
+        banner.ctaHref = '#';
+        banner.addEventListener('seasonly:show', (e) => log('show: ' + e.detail.theme.id));
+        banner.addEventListener('seasonly:cta', (e) => log('cta clicked: ' + e.detail.theme.id));
+        banner.addEventListener('seasonly:dismiss', (e) => log('dismissed: ' + e.detail.theme.id + ' (mode=' + e.detail.mode + ')'));
+        document.body.appendChild(banner);
+        current = banner;
+      });
+
+      $clear.addEventListener('click', () => {
+        const removed = [];
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('seasonly:dismissed:')) {
+            localStorage.removeItem(k);
+            removed.push(k);
+          }
+        }
+        log('cleared ' + removed.length + ' dismiss key(s)');
+      });
+    </script>
+  </body>
+</html>

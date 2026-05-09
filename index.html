@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>seasonly · date-aware seasonal theming for the web</title>
+    <meta name="description" content="Tiny zero-dependency seasonal theming. Banners and particles that resolve to today's active season from a pluggable calendar. LATAM-first, framework-agnostic Web Components." />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50%25' y='65%25' font-size='90' text-anchor='middle'%3E%E2%9D%84%3C/text%3E%3C/svg%3E" />
+    <style>
+      :root {
+        --bg-1: #0b1220;
+        --bg-2: #111827;
+        --fg: #e5e7eb;
+        --fg-dim: #9ca3af;
+        --accent: #67e8f9;
+        --glass: rgba(255, 255, 255, 0.06);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg-1: #f8fafc;
+          --bg-2: #f1f5f9;
+          --fg: #0f172a;
+          --fg-dim: #64748b;
+          --accent: #0891b2;
+          --glass: rgba(255, 255, 255, 0.7);
+          --glass-border: rgba(15, 23, 42, 0.08);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+        color: var(--fg);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; text-underline-offset: 4px; }
+      code, pre {
+        font-family: ui-monospace, "SF Mono", Consolas, "Liberation Mono", monospace;
+        font-size: 13px;
+      }
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+      header.hero {
+        padding: 120px 24px 80px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .hero h1 {
+        font-size: clamp(40px, 8vw, 72px);
+        margin: 0 0 12px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #67e8f9, #c084fc, #f472b6);
+        background-size: 200% 200%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: hero-shift 12s ease-in-out infinite;
+      }
+      @keyframes hero-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      .hero p.tagline {
+        font-size: clamp(16px, 2.4vw, 20px);
+        max-width: 640px;
+        margin: 0 auto 8px;
+        color: var(--fg-dim);
+      }
+      .hero p.eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 16px;
+      }
+      .hero-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 28px;
+      }
+      .btn {
+        font: inherit;
+        font-weight: 600;
+        padding: 12px 22px;
+        border-radius: 9999px;
+        border: 1px solid var(--glass-border);
+        background: var(--glass);
+        color: var(--fg);
+        cursor: pointer;
+        text-decoration: none;
+        transition: transform 0.25s var(--spring), background 0.2s ease, border-color 0.2s ease;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      .btn:hover { transform: translateY(-2px); border-color: var(--accent); text-decoration: none; }
+      .btn-primary {
+        background: linear-gradient(135deg, #67e8f9, #c084fc);
+        color: #0b1220;
+        border-color: transparent;
+      }
+      .btn-primary:hover { color: #0b1220; }
+
+      section { padding: 60px 0; }
+      h2 {
+        font-size: clamp(24px, 4vw, 32px);
+        margin: 0 0 8px;
+        letter-spacing: -0.01em;
+      }
+      h2 + .section-sub {
+        color: var(--fg-dim);
+        margin: 0 0 32px;
+        max-width: 640px;
+      }
+
+      .card {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 28px;
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+      }
+
+      /* Live preview area */
+      .preview-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      @media (min-width: 900px) {
+        .preview-grid { grid-template-columns: 1.2fr 1fr; }
+      }
+      .preview-stage {
+        position: relative;
+        height: 360px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+        border: 1px solid var(--glass-border);
+        contain: layout paint;
+      }
+      .preview-stage seasonly-banner,
+      .preview-stage seasonly-particles {
+        position: absolute !important;
+      }
+      .preview-stage seasonly-banner {
+        --seasonly-radius: 0;
+      }
+      .preview-empty {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--fg-dim);
+        font-size: 13px;
+        text-align: center;
+        padding: 24px;
+      }
+
+      .controls label { display: block; font-weight: 600; font-size: 13px; margin: 12px 0 6px; color: var(--fg-dim); }
+      .date-display {
+        font-family: ui-monospace, monospace;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--fg);
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 9999px;
+        outline: none;
+        margin: 8px 0;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: grab;
+        box-shadow: 0 4px 12px rgba(103, 232, 249, 0.5);
+        transition: transform 0.2s var(--spring);
+      }
+      input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+      input[type="range"]::-moz-range-thumb {
+        width: 22px;
+        height: 22px;
+        border: none;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: grab;
+        box-shadow: 0 4px 12px rgba(103, 232, 249, 0.5);
+      }
+
+      .info-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--glass-border);
+        gap: 12px;
+      }
+      .info-row:last-child { border-bottom: 0; }
+      .info-row .k { color: var(--fg-dim); font-size: 13px; }
+      .info-row .v { font-family: ui-monospace, monospace; font-size: 13px; text-align: right; }
+      .gradient-preview {
+        height: 24px;
+        border-radius: 9999px;
+        margin-top: 8px;
+        border: 1px solid var(--glass-border);
+      }
+
+      pre.code {
+        background: rgba(0, 0, 0, 0.35);
+        padding: 16px;
+        border-radius: 12px;
+        overflow-x: auto;
+        font-size: 12px;
+        line-height: 1.55;
+        margin: 16px 0 0;
+        border: 1px solid var(--glass-border);
+      }
+      pre.code .kw { color: #c084fc; }
+      pre.code .str { color: #86efac; }
+      pre.code .num { color: #fb923c; }
+      pre.code .com { color: var(--fg-dim); font-style: italic; }
+      pre.code .fn { color: #67e8f9; }
+      pre.code .out { color: #fbbf24; }
+      @media (prefers-color-scheme: light) {
+        pre.code { background: rgba(15, 23, 42, 0.85); color: #e5e7eb; }
+      }
+
+      /* Year timeline */
+      .timeline-card { padding: 36px 28px 28px; }
+      .timeline-track {
+        position: relative;
+        height: 80px;
+        margin: 24px 0 8px;
+      }
+      .timeline-line {
+        position: absolute;
+        left: 0; right: 0; top: 50%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--glass-border) 5%, var(--glass-border) 95%, transparent);
+        transform: translateY(-50%);
+      }
+      .timeline-dot {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        border-radius: 50%;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        cursor: pointer;
+        transition: transform 0.25s var(--spring), border-color 0.2s ease;
+      }
+      .timeline-dot:hover {
+        transform: translate(-50%, -50%) scale(1.15);
+        border-color: var(--accent);
+        z-index: 10;
+      }
+      .timeline-dot.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 4px rgba(103, 232, 249, 0.2);
+      }
+      .timeline-dot .tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-8px);
+        background: var(--bg-1);
+        border: 1px solid var(--glass-border);
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 11px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+      }
+      .timeline-dot:hover .tooltip { opacity: 1; }
+      .month-labels {
+        position: relative;
+        margin-top: 4px;
+        height: 18px;
+      }
+      .month-labels span {
+        position: absolute;
+        font-size: 11px;
+        color: var(--fg-dim);
+        transform: translateX(-50%);
+      }
+
+      .install-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      @media (min-width: 760px) {
+        .install-grid { grid-template-columns: 1fr 1fr; }
+      }
+      .install-card h3 { margin: 0 0 12px; font-size: 16px; color: var(--fg-dim); font-weight: 600; }
+
+      footer {
+        padding: 60px 24px 80px;
+        text-align: center;
+        color: var(--fg-dim);
+        font-size: 13px;
+        border-top: 1px solid var(--glass-border);
+        margin-top: 60px;
+      }
+      footer a { margin: 0 8px; }
+
+      /* Background particles for hero (decorative) */
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.5;
+      }
+      .hero > .wrap { position: relative; z-index: 1; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hero h1 { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="seasonly-file-help" hidden style="position:fixed;inset:0;z-index:99999;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;padding:32px;font-family:system-ui,-apple-system,sans-serif">
+      <div style="max-width:560px;line-height:1.6">
+        <h1 style="margin:0 0 12px;font-size:22px">Open this page via <code>http://</code>, not <code>file://</code></h1>
+        <p>This demo imports ES modules. Browsers block module imports from <code>file://</code> URLs as a security measure (CORS on null origin).</p>
+        <p>From the repo root run:</p>
+        <pre style="background:rgba(255,255,255,0.08);padding:10px 12px;border-radius:8px;font-family:ui-monospace,monospace;font-size:13px">npm run dev</pre>
+        <p>Then open:</p>
+        <p><a id="seasonly-help-link" style="color:#67e8f9;font-family:ui-monospace,monospace;word-break:break-all"></a></p>
+      </div>
+    </div>
+    <script>
+      (function () {
+        if (location.protocol !== 'file:') return;
+        var help = document.getElementById('seasonly-file-help');
+        help.removeAttribute('hidden');
+        var link = document.getElementById('seasonly-help-link');
+        link.textContent = 'http://localhost:5173/';
+        link.href = 'http://localhost:5173/';
+      })();
+    </script>
+    <header class="hero">
+      <div class="hero-bg" id="hero-bg"></div>
+      <div class="wrap">
+        <p class="eyebrow" id="hero-eyebrow">Loading today's season...</p>
+        <h1>seasonly</h1>
+        <p class="tagline">
+          Date-aware seasonal banners and particles for any website.
+          Zero dependencies. LATAM-first. Web Components, framework-agnostic.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://www.npmjs.com/package/seasonly">npm install seasonly</a>
+          <a class="btn" href="https://github.com/StbanMc/seasonly">View on GitHub</a>
+          <a class="btn" href="#preview">See it live ↓</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="preview">
+        <div class="wrap">
+          <h2>See every season of the year</h2>
+          <p class="section-sub">
+            Move the slider to any date in 2026 — the banner, particles and
+            resolved season info update live. Click any peak on the timeline
+            below to jump straight to it.
+          </p>
+
+          <div class="preview-grid">
+            <div class="card">
+              <div class="preview-stage" id="preview-stage">
+                <div class="preview-empty" id="preview-empty">
+                  No active season for this date — try moving the slider.
+                </div>
+              </div>
+              <div class="controls">
+                <label for="date-slider">
+                  <span class="date-display" id="date-display">2026-01-01</span>
+                </label>
+                <input type="range" id="date-slider" min="0" max="364" value="128" step="1" />
+                <div style="display:flex;gap:8px;margin-top:12px">
+                  <button class="btn" id="reseed-btn" style="padding:8px 14px;font-size:13px">Reseed particles</button>
+                  <button class="btn" id="today-btn" style="padding:8px 14px;font-size:13px">Jump to today</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 style="margin:0 0 16px;font-size:14px;color:var(--fg-dim);font-weight:600;letter-spacing:0.05em;text-transform:uppercase">Resolved season</h3>
+              <div id="info-panel">
+                <div class="info-row"><span class="k">id</span><span class="v" id="info-id">—</span></div>
+                <div class="info-row"><span class="k">name</span><span class="v" id="info-name">—</span></div>
+                <div class="info-row"><span class="k">peak</span><span class="v" id="info-peak">—</span></div>
+                <div class="info-row"><span class="k">distance to peak</span><span class="v" id="info-distance">—</span></div>
+                <div class="info-row"><span class="k">particles</span><span class="v" id="info-particles">—</span></div>
+                <div class="info-row"><span class="k">window</span><span class="v" id="info-window">—</span></div>
+              </div>
+              <div class="gradient-preview" id="gradient-preview" style="background:linear-gradient(135deg,#0f172a,#475569)"></div>
+              <pre class="code" id="code-snippet"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <h2>Year at a glance</h2>
+          <p class="section-sub">
+            Every peak in the bundled <code>co</code> calendar (Colombia),
+            including moving holidays computed correctly for 2026 — Mother's
+            Day on the 2nd Sunday of May, Black Friday on the 4th Friday of
+            November, Día del Niño on the last Saturday of April.
+          </p>
+          <div class="card timeline-card">
+            <div class="timeline-track" id="timeline-track">
+              <div class="timeline-line"></div>
+              <!-- dots injected by JS -->
+            </div>
+            <div class="month-labels" id="month-labels"></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <h2>Install</h2>
+          <p class="section-sub">Pick the path that matches your stack. All paths use the same package.</p>
+
+          <div class="install-grid">
+            <div class="card install-card">
+              <h3>NPM (Next, Astro, Vue, Svelte, Vite)</h3>
+              <pre class="code"><span class="com"># Install</span>
+npm install seasonly
+
+<span class="com">// app.js</span>
+<span class="kw">import</span> { resolveSeason } <span class="kw">from</span> <span class="str">'seasonly'</span>;
+<span class="kw">import</span> { defineAll } <span class="kw">from</span> <span class="str">'seasonly/components'</span>;
+<span class="kw">import</span> co <span class="kw">from</span> <span class="str">'seasonly/calendars/co.json'</span> <span class="kw">with</span> { type: <span class="str">'json'</span> };
+
+defineAll();
+<span class="kw">const</span> active = <span class="fn">resolveSeason</span>(<span class="kw">new</span> <span class="fn">Date</span>(), co);</pre>
+            </div>
+
+            <div class="card install-card">
+              <h3>One-line CDN (WordPress, Shopify, Webflow, plain HTML)</h3>
+              <pre class="code"><span class="com">&lt;!-- Paste anywhere in your &lt;head&gt; or &lt;body&gt; --&gt;</span>
+&lt;<span class="kw">script</span> <span class="fn">type</span>=<span class="str">"module"</span>
+        <span class="fn">src</span>=<span class="str">"https://cdn.jsdelivr.net/npm/seasonly@0/src/auto.js"</span>
+        <span class="fn">data-locale</span>=<span class="str">"co"</span>
+        <span class="fn">data-mode</span>=<span class="str">"banner+particles"</span>
+        <span class="fn">data-message</span>=<span class="str">"30% off this Black Friday"</span>
+        <span class="fn">data-cta-text</span>=<span class="str">"Shop"</span>
+        <span class="fn">data-cta-href</span>=<span class="str">"/promos"</span>&gt;
+&lt;/<span class="kw">script</span>&gt;</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <h2>Why seasonly</h2>
+          <div class="install-grid">
+            <div class="card">
+              <h3 style="margin-top:0">Calendar-aware, not stopwatch-aware</h3>
+              <p>Most particle libraries fire when you tell them to. seasonly resolves <em>which</em> theme should be active <em>today</em> against a pluggable calendar — and the calendar can be Colombian, Mexican, religious, or your own product's anniversary roster.</p>
+            </div>
+            <div class="card">
+              <h3 style="margin-top:0">Moving holidays done right</h3>
+              <p>Mother's Day is the 2nd Sunday of May, not <code>05-11</code>. Father's Day is the 3rd Sunday of June, not <code>06-15</code>. seasonly expresses these as rules so the date is correct <em>every year</em> — without manual updates.</p>
+            </div>
+            <div class="card">
+              <h3 style="margin-top:0">Accessibility is not a toggle</h3>
+              <p><code>prefers-reduced-motion: reduce</code> turns off animations and renders the particles layer empty. Users with vestibular sensitivities set that preference precisely to suppress decorative motion — the right answer is to listen.</p>
+            </div>
+            <div class="card">
+              <h3 style="margin-top:0">Zero deps, by contract</h3>
+              <p>The library has zero runtime <em>and</em> zero dev dependencies. CI fails the build the moment a single dependency sneaks in. The whole source ships at ~20 KB gzipped.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <p>
+          <a href="https://github.com/StbanMc/seasonly">GitHub</a> ·
+          <a href="https://www.npmjs.com/package/seasonly">npm</a> ·
+          <a href="https://github.com/StbanMc/seasonly/blob/main/LICENSE">MIT License</a>
+        </p>
+        <p style="margin-top:16px;opacity:0.7">
+          Built by <a href="https://github.com/StbanMc">Esteban Esquivel</a> in Bogotá · 2026
+        </p>
+      </div>
+    </footer>
+
+    <script type="module">
+      import { resolveSeason, listPeaks } from './src/index.js';
+      import { defineSeasonlyBanner } from './src/components/banner.js';
+      import { defineSeasonlyParticles } from './src/components/particles.js';
+      import { listEffects } from './src/components/particles-effects.js';
+
+      defineSeasonlyBanner();
+      defineSeasonlyParticles();
+
+      const co = await fetch('./calendars/co.json').then((r) => r.json());
+
+      const YEAR = 2026;
+      const ONE_DAY = 86400000;
+      const $ = (id) => document.getElementById(id);
+
+      const stage = $('preview-stage');
+      const empty = $('preview-empty');
+      const slider = $('date-slider');
+      const dateDisplay = $('date-display');
+      const heroEyebrow = $('hero-eyebrow');
+      const heroBg = $('hero-bg');
+
+      function dayOfYearToDate(day) {
+        return new Date(YEAR, 0, 1 + day);
+      }
+      function dateToDayOfYear(date) {
+        const start = new Date(date.getFullYear(), 0, 1);
+        return Math.floor((date - start) / ONE_DAY);
+      }
+      function fmtDate(date) {
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return date.getFullYear() + '-' + m + '-' + d;
+      }
+      function escape(s) {
+        return String(s).replace(/[&<>"']/g, (c) => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+      }
+
+      let bannerEl = null;
+      let particlesEl = null;
+      let bgParticlesEl = null;
+      let currentSeed = 42;
+
+      function renderPreview(active, seed) {
+        if (bannerEl) { bannerEl.remove(); bannerEl = null; }
+        if (particlesEl) { particlesEl.remove(); particlesEl = null; }
+
+        if (!active) {
+          empty.style.display = 'flex';
+          return;
+        }
+        empty.style.display = 'none';
+
+        const season = active.season;
+        particlesEl = document.createElement('seasonly-particles');
+        particlesEl.theme = season;
+        particlesEl.setAttribute('seed', String(seed));
+        stage.appendChild(particlesEl);
+
+        bannerEl = document.createElement('seasonly-banner');
+        bannerEl.theme = season;
+        stage.appendChild(bannerEl);
+      }
+
+      function renderInfo(today, active) {
+        if (!active) {
+          $('info-id').textContent = '—';
+          $('info-name').textContent = '—';
+          $('info-peak').textContent = '—';
+          $('info-distance').textContent = '—';
+          $('info-particles').textContent = '—';
+          $('info-window').textContent = '—';
+          $('gradient-preview').style.background = 'linear-gradient(135deg, #0f172a, #475569)';
+          return;
+        }
+        const s = active.season;
+        $('info-id').textContent = s.id;
+        $('info-name').textContent = (s.icon ? s.icon + ' ' : '') + s.name;
+        $('info-peak').textContent = fmtDate(active.peakDate);
+        $('info-distance').textContent = active.distance + ' day' + (active.distance === 1 ? '' : 's');
+        $('info-particles').textContent = s.particles || 'none';
+        $('info-window').textContent = fmtDate(active.windowStart) + ' → ' + fmtDate(active.windowEnd);
+        if (Array.isArray(s.gradient) && s.gradient.length >= 2) {
+          $('gradient-preview').style.background = 'linear-gradient(135deg, ' + s.gradient.join(', ') + ')';
+        }
+      }
+
+      function renderCode(today, active) {
+        const dateStr = fmtDate(today);
+        const id = active ? active.season.id : null;
+        const distance = active ? active.distance : null;
+        const lines = [
+          '<span class="kw">import</span> { resolveSeason } <span class="kw">from</span> <span class="str">\'seasonly\'</span>;',
+          '<span class="kw">import</span> co <span class="kw">from</span> <span class="str">\'seasonly/calendars/co.json\'</span>;',
+          '',
+          '<span class="kw">const</span> today = <span class="kw">new</span> <span class="fn">Date</span>(<span class="str">\'' + dateStr + '\'</span>);',
+          '<span class="kw">const</span> active = <span class="fn">resolveSeason</span>(today, co);',
+          '',
+          '<span class="com">// →</span>',
+          active
+            ? '<span class="com">// active.season.id    =</span> <span class="str">\'' + escape(id) + '\'</span>'
+            : '<span class="com">// active              =</span> <span class="kw">null</span>',
+          active ? '<span class="com">// active.distance     =</span> <span class="num">' + distance + '</span>' : null,
+          active ? '<span class="com">// active.peakDate     =</span> <span class="str">\'' + fmtDate(active.peakDate) + '\'</span>' : null,
+        ].filter((x) => x !== null);
+        $('code-snippet').innerHTML = lines.join('\n');
+      }
+
+      function renderTimeline() {
+        const track = $('timeline-track');
+        const peaks = listPeaks(co, YEAR);
+        for (const p of peaks) {
+          const dot = document.createElement('div');
+          dot.className = 'timeline-dot';
+          dot.dataset.day = String(dateToDayOfYear(p.peakDate));
+          dot.style.left = ((dateToDayOfYear(p.peakDate) / 364) * 100).toFixed(2) + '%';
+          const season = co.seasons.find((s) => s.id === p.id);
+          dot.textContent = (season && season.icon) || '•';
+          const tip = document.createElement('span');
+          tip.className = 'tooltip';
+          tip.textContent = p.name + ' · ' + fmtDate(p.peakDate);
+          dot.appendChild(tip);
+          dot.addEventListener('click', () => {
+            slider.value = dot.dataset.day;
+            slider.dispatchEvent(new Event('input'));
+          });
+          track.appendChild(dot);
+        }
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const labels = $('month-labels');
+        for (let m = 0; m < 12; m++) {
+          const span = document.createElement('span');
+          span.textContent = months[m];
+          const day = dateToDayOfYear(new Date(YEAR, m, 15));
+          span.style.left = ((day / 364) * 100).toFixed(2) + '%';
+          labels.appendChild(span);
+        }
+      }
+
+      function highlightActiveDot(active) {
+        const id = active ? active.season.id : null;
+        document.querySelectorAll('.timeline-dot').forEach((d) => {
+          const tipText = d.querySelector('.tooltip').textContent;
+          d.classList.toggle('active', !!id && tipText.startsWith(co.seasons.find((s) => s.id === id).name));
+        });
+      }
+
+      function update(seed = currentSeed) {
+        const day = Number(slider.value);
+        const today = dayOfYearToDate(day);
+        const active = resolveSeason(today, co);
+        dateDisplay.textContent = fmtDate(today);
+        renderPreview(active, seed);
+        renderInfo(today, active);
+        renderCode(today, active);
+        highlightActiveDot(active);
+      }
+
+      function mountHeroBackground() {
+        const today = new Date();
+        const active = resolveSeason(today, co);
+        if (!active) {
+          heroEyebrow.textContent = 'No active season today · pick one below';
+          return;
+        }
+        heroEyebrow.textContent = 'Today is ' + (active.season.icon || '') + ' ' + active.season.name + ' · day ' + Math.abs(active.distance) + (active.daysToPeak > 0 ? ' before peak' : active.daysToPeak < 0 ? ' after peak' : '');
+
+        bgParticlesEl = document.createElement('seasonly-particles');
+        bgParticlesEl.theme = active.season;
+        bgParticlesEl.setAttribute('seed', '7');
+        heroBg.appendChild(bgParticlesEl);
+
+        // Pre-position the slider on today.
+        slider.value = dateToDayOfYear(today);
+      }
+
+      // Wire up
+      renderTimeline();
+      mountHeroBackground();
+      update();
+
+      slider.addEventListener('input', () => update());
+      $('reseed-btn').addEventListener('click', () => {
+        currentSeed = Math.floor(Math.random() * 1e6);
+        update(currentSeed);
+      });
+      $('today-btn').addEventListener('click', () => {
+        slider.value = dateToDayOfYear(new Date());
+        update();
+      });
+    </script>
+  </body>
+</html>

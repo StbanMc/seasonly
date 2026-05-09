@@ -1,0 +1,61 @@
+name: Feature request
+description: Suggest an addition or improvement.
+labels: ['enhancement', 'needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening, please skim CONTRIBUTING.md so the request lands close to
+        the project philosophy (zero deps, accessibility-first, no imposed copy).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is the problem?
+      description: Describe the situation in which the current library falls short. Skip the solution for now.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What behavior would make the situation right? An API sketch is welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Anything you tried that almost worked, or libraries that solve part of this.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which part of seasonly does this touch?
+      multiple: true
+      options:
+        - Resolver / calendars / schema
+        - <seasonly-banner>
+        - <seasonly-particles>
+        - Auto-init script
+        - Docs / examples / demo
+        - Tooling (size budget, dev server)
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contracts
+    attributes:
+      label: Does this respect the project contracts?
+      options:
+        - label: I am not asking for a runtime dependency.
+          required: true
+        - label: I am not asking for behavior that overrides `prefers-reduced-motion`.
+          required: true
+        - label: I am not asking the library to ship marketing copy or CTAs.
+          required: true

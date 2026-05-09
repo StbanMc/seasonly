@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>seasonly · particles gallery</title>
+    <style>
+      :root { color-scheme: light dark; }
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Inter", sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        background: linear-gradient(180deg, #0f172a, #1e293b);
+        color: #e2e8f0;
+        padding: 32px 24px;
+      }
+      h1 { font-size: 24px; margin: 0 0 8px; }
+      .subtitle { opacity: 0.7; margin-bottom: 24px; max-width: 640px; line-height: 1.5; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+        max-width: 1200px;
+      }
+      .tile {
+        position: relative;
+        height: 220px;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        cursor: pointer;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    border-color 0.2s ease;
+      }
+      .tile:hover { transform: translateY(-2px); border-color: rgba(255, 255, 255, 0.18); }
+      .tile-label {
+        position: absolute;
+        bottom: 12px;
+        left: 14px;
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        background: rgba(15, 23, 42, 0.7);
+        padding: 4px 10px;
+        border-radius: 9999px;
+        z-index: 10;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+      .tile seasonly-particles {
+        position: absolute !important;
+        inset: 0 !important;
+      }
+      .controls {
+        margin-top: 24px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      button {
+        font: inherit; font-weight: 600;
+        padding: 8px 16px; border-radius: 9999px;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.06); color: inherit; cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    background 0.2s ease;
+      }
+      button:hover { transform: translateY(-1px); background: rgba(255,255,255,0.12); }
+    </style>
+  </head>
+  <body>
+    <div id="seasonly-file-help" hidden style="position:fixed;inset:0;z-index:99999;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;padding:32px;font-family:system-ui,-apple-system,sans-serif">
+      <div style="max-width:560px;line-height:1.6">
+        <h1 style="margin:0 0 12px;font-size:22px">Open this page via <code>http://</code>, not <code>file://</code></h1>
+        <p>This example imports ES modules. Browsers block module imports from <code>file://</code> URLs as a security measure (CORS on null origin).</p>
+        <p>From the repo root run:</p>
+        <pre style="background:rgba(255,255,255,0.08);padding:10px 12px;border-radius:8px;font-family:ui-monospace,monospace;font-size:13px">npm run dev</pre>
+        <p>Then open:</p>
+        <p><a id="seasonly-help-link" style="color:#67e8f9;font-family:ui-monospace,monospace;word-break:break-all"></a></p>
+      </div>
+    </div>
+    <script>
+      (function () {
+        if (location.protocol !== 'file:') return;
+        var help = document.getElementById('seasonly-file-help');
+        help.removeAttribute('hidden');
+        var link = document.getElementById('seasonly-help-link');
+        var path = location.pathname;
+        var idx = path.lastIndexOf('/examples/');
+        var rel = idx >= 0 ? path.slice(idx + 1) : 'examples/' + path.split('/').pop();
+        link.textContent = 'http://localhost:5173/' + rel;
+        link.href = 'http://localhost:5173/' + rel;
+      })();
+    </script>
+    <h1>seasonly · particles gallery</h1>
+    <p class="subtitle">
+      All bundled effects rendered side-by-side. Each tile is its own
+      Shadow DOM, so styles never leak. Try toggling system "Reduce
+      motion" — every tile should go empty (intentional: users who set
+      that preference are explicitly asking us to stop animating).
+    </p>
+
+    <div class="controls">
+      <button id="reseed">Reseed all</button>
+      <button id="reload">Re-mount all</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <script type="module">
+      import { listEffects } from '../src/components/particles-effects.js';
+      import { defineSeasonlyParticles } from '../src/components/particles.js';
+
+      defineSeasonlyParticles();
+
+      const grid = document.getElementById('grid');
+      const effects = listEffects().filter((n) => n !== 'none');
+
+      function mount(seed = Math.floor(Math.random() * 1e6)) {
+        grid.innerHTML = '';
+        for (const name of effects) {
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.dataset.effect = name;
+
+          const label = document.createElement('span');
+          label.className = 'tile-label';
+          label.textContent = name;
+
+          const particles = document.createElement('seasonly-particles');
+          particles.setAttribute('effect', name);
+          particles.setAttribute('seed', String(seed + name.length));
+
+          tile.appendChild(particles);
+          tile.appendChild(label);
+          grid.appendChild(tile);
+        }
+      }
+
+      document.getElementById('reseed').addEventListener('click', () => {
+        mount(Math.floor(Math.random() * 1e6));
+      });
+      document.getElementById('reload').addEventListener('click', () => mount());
+
+      mount(42);
+    </script>
+  </body>
+</html>

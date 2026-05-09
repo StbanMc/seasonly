@@ -1,0 +1,162 @@
+{
+  "$schema": "../docs/calendar.schema.json",
+  "id": "co",
+  "name": "Colombia",
+  "version": "1.0.0",
+  "seasons": [
+    {
+      "id": "new-year",
+      "name": "Año Nuevo",
+      "date": "01-01",
+      "daysBefore": 6,
+      "daysAfter": 7,
+      "particles": "confetti",
+      "gradient": ["#0ea5e9", "#fde047"],
+      "textColor": "#0c4a6e",
+      "icon": "🎊"
+    },
+    {
+      "id": "valentines",
+      "name": "Día de San Valentín",
+      "date": "02-14",
+      "daysBefore": 7,
+      "daysAfter": 7,
+      "particles": "hearts",
+      "gradient": ["#fb7185", "#f472b6"],
+      "textColor": "#831843",
+      "icon": "💝"
+    },
+    {
+      "id": "womens-day",
+      "name": "Día de la Mujer",
+      "date": "03-08",
+      "daysBefore": 7,
+      "daysAfter": 7,
+      "particles": "stars",
+      "gradient": ["#a855f7", "#ec4899"],
+      "textColor": "#3b0764",
+      "icon": "💜"
+    },
+    {
+      "id": "childrens-day",
+      "name": "Día del Niño",
+      "rule": { "type": "weekday", "month": 4, "weekday": 6, "occurrence": -1 },
+      "daysBefore": 7,
+      "daysAfter": 7,
+      "particles": "balloons",
+      "gradient": ["#fbbf24", "#3b82f6"],
+      "textColor": "#1e3a8a",
+      "icon": "🎈"
+    },
+    {
+      "id": "mothers-day",
+      "name": "Día de la Madre",
+      "rule": { "type": "weekday", "month": 5, "weekday": 0, "occurrence": 2 },
+      "daysBefore": 7,
+      "daysAfter": 7,
+      "particles": "flowers",
+      "gradient": ["#f9a8d4", "#fb923c"],
+      "textColor": "#831843",
+      "icon": "🌸"
+    },
+    {
+      "id": "fathers-day",
+      "name": "Día del Padre",
+      "rule": { "type": "weekday", "month": 6, "weekday": 0, "occurrence": 3 },
+      "daysBefore": 7,
+      "daysAfter": 7,
+      "particles": "none",
+      "gradient": ["#1e293b", "#475569"],
+      "textColor": "#f1f5f9",
+      "icon": "👔"
+    },
+    {
+      "id": "independence-day",
+      "name": "Día de la Independencia",
+      "date": "07-20",
+      "daysBefore": 7,
+      "daysAfter": 7,
+      "particles": "flags",
+      "gradient": ["#fde047", "#3b82f6"],
+      "textColor": "#7c2d12",
+      "icon": "🇨🇴"
+    },
+    {
+      "id": "kite-month",
+      "name": "Mes de las Cometas",
+      "date": "08-15",
+      "daysBefore": 14,
+      "daysAfter": 14,
+      "particles": "kites",
+      "gradient": ["#38bdf8", "#22d3ee"],
+      "textColor": "#0c4a6e",
+      "icon": "🪁"
+    },
+    {
+      "id": "love-friendship",
+      "name": "Día del Amor y la Amistad",
+      "rule": { "type": "weekday", "month": 9, "weekday": 6, "occurrence": 3 },
+      "daysBefore": 13,
+      "daysAfter": 10,
+      "particles": "hearts",
+      "gradient": ["#fb923c", "#f43f5e"],
+      "textColor": "#7f1d1d",
+      "icon": "💌"
+    },
+    {
+      "id": "halloween",
+      "name": "Halloween",
+      "date": "10-31",
+      "daysBefore": 7,
+      "daysAfter": 1,
+      "particles": "bats",
+      "gradient": ["#1e1b4b", "#f97316"],
+      "textColor": "#fff7ed",
+      "icon": "🎃"
+    },
+    {
+      "id": "black-friday",
+      "name": "Black Friday",
+      "rule": { "type": "weekday", "month": 11, "weekday": 5, "occurrence": 4 },
+      "daysBefore": 3,
+      "daysAfter": 5,
+      "particles": "lightning",
+      "gradient": ["#0f172a", "#a21caf"],
+      "textColor": "#fae8ff",
+      "icon": "⚡"
+    },
+    {
+      "id": "candles-day",
+      "name": "Día de las Velitas",
+      "date": "12-07",
+      "daysBefore": 7,
+      "daysAfter": 7,
+      "particles": "candles",
+      "gradient": ["#fb923c", "#fde047"],
+      "textColor": "#7c2d12",
+      "icon": "🕯️"
+    },
+    {
+      "id": "christmas",
+      "name": "Navidad",
+      "date": "12-25",
+      "daysBefore": 10,
+      "daysAfter": 0,
+      "particles": "snowflakes",
+      "gradient": ["#15803d", "#dc2626"],
+      "textColor": "#fef2f2",
+      "icon": "🎄"
+    },
+    {
+      "id": "new-years-eve",
+      "name": "Fin de Año",
+      "date": "12-31",
+      "daysBefore": 3,
+      "daysAfter": 0,
+      "particles": "fireworks",
+      "gradient": ["#312e81", "#fbbf24"],
+      "textColor": "#fef9c3",
+      "icon": "✨"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# Dependabot config
+#
+# Note: this library has zero runtime dependencies and zero dev dependencies.
+# Dependabot here only watches GitHub Actions versions in workflows so they
+# stay current.
+version: 2
+updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'monthly'
+    open-pull-requests-limit: 3
+    labels:
+      - 'dependencies'
+      - 'github-actions'

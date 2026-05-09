@@ -1,0 +1,70 @@
+name: Propose a new regional calendar
+description: Add `mx`, `ar`, `cl`, religious calendars, or any community calendar.
+labels: ['calendar', 'needs-triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Calendar contributions are the most welcome contribution to this project.
+        This template captures the information a reviewer needs in order to merge
+        a new calendar with confidence. You are welcome to open the issue first
+        to align on naming and scope before sending the actual PR.
+
+  - type: input
+    id: id
+    attributes:
+      label: Calendar id
+      description: Short, lowercase. ISO 3166-1 alpha-2 for countries (`mx`, `ar`) or a clear community name (`hindu-festivals`).
+      placeholder: mx
+    validations:
+      required: true
+
+  - type: input
+    id: display-name
+    attributes:
+      label: Display name
+      placeholder: México
+    validations:
+      required: true
+
+  - type: textarea
+    id: holidays
+    attributes:
+      label: Holidays you plan to include
+      description: One per line. For each, indicate whether it is a fixed date (`MM-DD`) or a moving holiday rule (Nth weekday of a month).
+      placeholder: |
+        - Año Nuevo (01-01)
+        - Día de la Constitución (1st Monday of February)
+        - Día de Muertos (11-02)
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Primary sources
+      description: Cite a primary source (government decree, official calendar, Wikipedia article that itself cites a primary source) for any non-obvious or moving holiday.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: maintenance
+    attributes:
+      label: Will you maintain this calendar?
+      description: If a holiday rule changes, or a new public holiday is created, will you send a follow-up PR?
+      options:
+        - 'Yes, I will keep this updated.'
+        - 'No, please consider this a one-time contribution.'
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: cultural
+    attributes:
+      label: Cultural authenticity
+      options:
+        - label: I am from the culture whose calendar this represents, OR I have worked with someone who is to verify the choices.
+          required: true
+        - label: I have not duplicated an existing bundled calendar without justification.
+          required: true

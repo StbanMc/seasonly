@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>seasonly · auto-init smoke</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", "Inter", sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, #f8fafc, #e2e8f0);
+        padding: 80px 24px;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { background: linear-gradient(180deg, #0f172a, #1e293b); color: #e2e8f0; }
+      }
+      .stage {
+        max-width: 640px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        border-radius: 18px;
+        padding: 32px;
+        box-shadow: 0 24px 60px -20px rgba(15, 23, 42, 0.25);
+      }
+      @media (prefers-color-scheme: dark) {
+        .stage { background: rgba(15, 23, 42, 0.7); border-color: rgba(255, 255, 255, 0.06); }
+      }
+      h1 { margin: 0 0 12px; }
+      pre {
+        background: rgba(0,0,0,0.04);
+        padding: 12px;
+        border-radius: 10px;
+        overflow-x: auto;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+      @media (prefers-color-scheme: dark) {
+        pre { background: rgba(255,255,255,0.05); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="seasonly-file-help" hidden style="position:fixed;inset:0;z-index:99999;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;padding:32px;font-family:system-ui,-apple-system,sans-serif">
+      <div style="max-width:560px;line-height:1.6">
+        <h1 style="margin:0 0 12px;font-size:22px">Open this page via <code>http://</code>, not <code>file://</code></h1>
+        <p>This example imports ES modules. Browsers block module imports from <code>file://</code> URLs as a security measure (CORS on null origin).</p>
+        <p>From the repo root run:</p>
+        <pre style="background:rgba(255,255,255,0.08);padding:10px 12px;border-radius:8px;font-family:ui-monospace,monospace;font-size:13px">npm run dev</pre>
+        <p>Then open:</p>
+        <p><a id="seasonly-help-link" style="color:#67e8f9;font-family:ui-monospace,monospace;word-break:break-all"></a></p>
+      </div>
+    </div>
+    <script>
+      (function () {
+        if (location.protocol !== 'file:') return;
+        var help = document.getElementById('seasonly-file-help');
+        help.removeAttribute('hidden');
+        var link = document.getElementById('seasonly-help-link');
+        var path = location.pathname;
+        var idx = path.lastIndexOf('/examples/');
+        var rel = idx >= 0 ? path.slice(idx + 1) : 'examples/' + path.split('/').pop();
+        link.textContent = 'http://localhost:5173/' + rel;
+        link.href = 'http://localhost:5173/' + rel;
+      })();
+    </script>
+    <main class="stage">
+      <h1>seasonly · auto-init</h1>
+      <p>
+        This page mounts seasonly without writing a single line of JS.
+        The script tag at the bottom of the page does everything via
+        <code>data-*</code> attributes — the same pattern you would paste
+        into WordPress, Shopify, Webflow, or any HTML page.
+      </p>
+      <pre><code>&lt;script type="module"
+        src="../src/auto.js"
+        data-locale="co"
+        data-mode="banner+particles"
+        data-message="Mira nuestras ofertas de temporada"
+        data-cta-text="Ver más"
+        data-cta-href="#hero"
+        data-debug&gt;
+&lt;/script&gt;</code></pre>
+      <p>
+        Open the browser console — with <code>data-debug</code> the lib
+        logs exactly what it loaded and mounted.
+      </p>
+    </main>
+
+    <script type="module"
+            src="../src/auto.js"
+            data-locale="co"
+            data-mode="banner+particles"
+            data-message="Mira nuestras ofertas de temporada"
+            data-cta-text="Ver más"
+            data-cta-href="#hero"
+            data-debug>
+    </script>
+  </body>
+</html>
